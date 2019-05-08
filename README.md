@@ -9,7 +9,7 @@ We will use this project as incubator for new Kube scheduler extension ideas. On
 
 This is an extender to a default Kubernetes scheduler which provides predicates and priority functions with the intent of making safe loading of the nodes. The word "safe" refers to not overloading the nodes and distributing the load, accounting for variability in resource usage, rather than just amount of allocated resources. This extended Kubernetes scheduler, referred to as SSX, uses historical resource usage data to schedule pods as opposed to relying on the specified pod requested demand. Overview and background information is [here](docs/usageResourceAlloc.pdf). The current version of SSX considers two resources: CPU and memory. It is based on the [Kubernetes secheduler example](https://github.com/everpeace/k8s-scheduler-extender-example).
 
-A (separate) data collection component gathers node resource usage data  (through Prometheus, for example) and annotates the node with such information. For example, data about resource usage is given as follows.
+A (separate) data collection component (example code in node-annotator directory) gathers node resource usage data  (through Prometheus, for example) and annotates the node with such information. For example, data about resource usage is given as follows.
 
 ```bash
 Annotations:
