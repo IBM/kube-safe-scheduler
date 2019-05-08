@@ -1,0 +1,38 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: node-annotator
+  namespace: kube-system
+spec:
+  template:
+    metadata:
+      labels:
+        daemon: node-annotator
+      name: node-annotator-deployment
+    spec:
+      containers:
+        -
+          image: <DOCKER_IMAGE>
+          imagePullPolicy: Always
+          name: node-annotator
+          env:
+          - name: PROM_IP
+            value: <PROMETHEUS_IP_ADDRESS>
+          - name: PROM_PORT
+            value: <PROMETHEUS_PORT>
+          - name: NODE_EXP_PORT
+            value: <NODE_EXPORTER_PORT>
+          resources:
+            limits:
+              cpu: 200m
+              memory: 500Mi
+            requests:
+              cpu: 10m
+              memory: 10Mi
+          securityContext:
+            privileged: true
+            runAsUser: 0
+      hostNetwork: true
+
+
