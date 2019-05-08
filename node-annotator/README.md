@@ -15,15 +15,15 @@ How to get the Prometheus IP address: Run the following command where monitoring
 kubectl get pods monitoring-prometheus-xxxxx -n=kube-system -o wide
 ```
 
-How to get the Prometheus Port
+How to get the Prometheus port number
 ```bash
 kubectl get svc -n kube-system | grep monitoring-prometheus
 ```
 
-How to get the Node Exporter Port
+How to get the Node Exporter port number
 ```bash
 kubectl get svc -n kube-system | grep monitoring-prometheus-nodeexporter 
-
+```
 
 ## Instructions
 
