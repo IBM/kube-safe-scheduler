@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import print_function
 import argparse
 import collections
 import csv
@@ -178,24 +179,24 @@ def main():
         f.write(prefixes + '\n')
 
     if options.print_sig_prefixes:
-        print prefixes
+        print(prefixes)
         return
 
     outdated_tests = sorted(set(owners) - set(test_names))
     new_tests = sorted(set(test_names) - set(owners))
     maintainers = get_maintainers()
 
-    print '# OUTDATED TESTS (%d):' % len(outdated_tests)
-    print  '\n'.join('%s -- %s%s' %
+    print('# OUTDATED TESTS (%d):' % len(outdated_tests))
+    print('\n'.join('%s -- %s%s' %
                      (t, owners[t][0], ['', ' (random)'][owners[t][1]])
-                      for t in outdated_tests)
-    print '# NEW TESTS (%d):' % len(new_tests)
-    print  '\n'.join(new_tests)
+                      for t in outdated_tests))
+    print('# NEW TESTS (%d):' % len(new_tests))
+    print('\n'.join(new_tests))
 
     if options.check:
         if new_tests or outdated_tests:
-            print
-            print 'ERROR: the test list has changed'
+            print()
+            print('ERROR: the test list has changed')
             sys.exit(1)
         sys.exit(0)
 
@@ -206,13 +207,13 @@ def main():
         owners.pop(name)
 
     if not options.addonly:
-        print '# UNEXPECTED MAINTAINERS ',
-        print '(randomly assigned, but not in kubernetes-maintainers)'
+        print('# UNEXPECTED MAINTAINERS ', end=' ')
+        print('(randomly assigned, but not in kubernetes-maintainers)')
         for name, (owner, random_assignment, _) in sorted(owners.iteritems()):
             if random_assignment and owner not in maintainers:
-                print '%-16s %s' % (owner, name)
+                print('%-16s %s' % (owner, name))
                 owners.pop(name)
-        print
+        print()
 
     owner_counts = collections.Counter(
         owner for name, (owner, random, sig) in owners.iteritems()
@@ -228,9 +229,9 @@ def main():
         owners[test_name] = (new_owner, random_assignment, "")
 
     if options.user.lower() == 'random':
-        print '# Tests per maintainer:'
+        print('# Tests per maintainer:')
         for owner, count in owner_counts.most_common():
-            print '%-20s %3d' % (owner, count)
+            print('%-20s %3d' % (owner, count))
 
     write_owners(OWNERS_PATH, owners)
 

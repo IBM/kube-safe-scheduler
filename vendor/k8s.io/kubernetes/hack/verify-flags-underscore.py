@@ -35,7 +35,7 @@ def is_binary(pathname):
     try:
         with open(pathname, 'r') as f:
             CHUNKSIZE = 1024
-            while 1:
+            while True:
                 chunk = f.read(CHUNKSIZE)
                 if '\0' in chunk: # found null byte
                     return True
@@ -110,8 +110,7 @@ def check_underscore_in_flags(rootdir, files):
     if len(new_excluded_flags) != 0:
         print("Found a flag declared with an _ but which is not explicitly listed as a valid flag name in hack/verify-flags/excluded-flags.txt")
         print("Are you certain this flag should not have been declared with an - instead?")
-        l = list(new_excluded_flags)
-        l.sort()
+        l = sorted(new_excluded_flags)
         print("%s" % "\n".join(l))
         sys.exit(1)
 

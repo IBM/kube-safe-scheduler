@@ -1,3 +1,4 @@
+from __future__ import print_function
 import csv
 import requests
 import time
@@ -69,7 +70,7 @@ class FetchData:
             FetchData.write_csv(results) # this is optional
 
 
-            print FetchData.data["value"].mean(), FetchData.data["value"].std(), FetchData.data["value"].min()
+            print(FetchData.data["value"].mean(), FetchData.data["value"].std(), FetchData.data["value"].min())
 
             #curate the data
             if requested > 0:
@@ -172,7 +173,7 @@ class FetchData:
             predicted = output[0]
             print('predicted = %f' % (predicted))
         except Exception as e:
-            print ("ARIMA error occured while predicting: ", e)
+            print(("ARIMA error occured while predicting: ", e))
             return
         #error = mean_squared_error(test, predictions) # needed to optimize the params (future work).
         #print('Test MSE: %.3f' % error)
