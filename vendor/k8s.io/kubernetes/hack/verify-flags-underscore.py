@@ -110,8 +110,7 @@ def check_underscore_in_flags(rootdir, files):
     if len(new_excluded_flags) != 0:
         print("Found a flag declared with an _ but which is not explicitly listed as a valid flag name in hack/verify-flags/excluded-flags.txt")
         print("Are you certain this flag should not have been declared with an - instead?")
-        l = sorted(new_excluded_flags)
-        print("%s" % "\n".join(l))
+        print("%s" % "\n".join(sorted(new_excluded_flags)))
         sys.exit(1)
 
 def main():
