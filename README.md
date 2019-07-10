@@ -1,7 +1,22 @@
 # kube-safe-scheduler
 
+## Motivation
 
-Scheduler extension for Kubernetes, together with node annotator that collects statistics from Prometheus (or Metric server) to be used by the scheduling algorithm. The Safe Scheduler performs risk-aware (safe) allocation of resources, based on actual and predicted resource usage statistics of each node in the cluster, hence leading to safer placement of workload avoiding noisy neighbors, and reducing probability of evictions. It also can be configured to perform risk-aware over-commitment leading to better cluster utilization. The risk calculation minimizes the probability of exceeding the available resources, thus the name "Safe Scheduler".
+The Kubernetes `default scheduler` offers a lot of value in terms of the vast number of predicates and priorities it implements. Moreover, it is highly configurable, in the sense that we can change the default configuration to one that better matches our needs.
+
+![overview](media/overview.png)
+
+However, there is still room for improvement, and this improvement can be implemented in the form of extensions. For example, as shown in the figure above the default scheduler does not consider the actual utilization of resources of a given node to place a pod. I.e., if two nodes have a capacity of 8 CPUs, and only 5 are requested on each, then the two nodes will be deemed equivalent (assuming everything else is identical) for the default scheduler. However, we can extend to the priority algorithms to favor the node with less CPU actual utilization over a given period of time (e.g. last 6 hours).
+
+![overview](media/use-case.png)
+
+Consider the example shown above, from the Kubernetes `default scheduler` perspective, both `Node_1` and `Node_2` are equally favorable for placing a new pod (e.g. requesting only CPU). However, by looking at historical data and the actual CPU utilization on the node, we can clearly see that we can be better performance for the new pod by placing it on `Node_1`. moreover this will further balance the CPU utilization accross the cluster nodes. 
+
+The `Safe Scheduler` targets this issue, as well as having the ability to take risks on nodes with high requests but low actual utilization to maximize efficiency.
+
+## Overview
+
+Scheduler extension for Kubernetes, together with node annotator that collects statistics from Prometheus (or Metric server) to be used by the scheduling algorithm. The `Safe Scheduler` performs risk-aware (safe) allocation of resources, based on actual and predicted resource usage statistics of each node in the cluster, hence leading to safer placement of workload avoiding noisy neighbors, and reducing probability of evictions. It also can be configured to perform risk-aware over-commitment leading to better cluster utilization. The risk calculation minimizes the probability of exceeding the available resources, thus the name "Safe Scheduler".
 
 We will use this project as incubator for new Kube scheduler extension ideas. One such idea brewing is to avoid nodes the pod is likely to fail on based on historical evidences.
 
@@ -53,7 +68,7 @@ env:
             value: "false"
 ```
 
-Samples of deployment yaml files for the Safe Scheduler Extender and pods are provided. The scheduler deployment file deploys a pod with two containers: a default scheduler (named my-scheduler) and the SSX extender. The desired predicates and priority functions to be applied in a given deployment are specified in the ConfigMap specifications. A pod uses the Safe Scheduler by asking for the scheduler by name (my-scheduler) as in the [pod creation example](test-pod.yaml). A [deployment example](extender.yaml) and [output example](docs/example.pdf) are provided.
+Samples of deployment yaml files for the `Safe Scheduler` Extender and pods are provided. The scheduler deployment file deploys a pod with two containers: a default scheduler (named my-scheduler) and the SSX extender. The desired predicates and priority functions to be applied in a given deployment are specified in the ConfigMap specifications. A pod uses the `Safe Scheduler` by asking for the scheduler by name (my-scheduler) as in the [pod creation example](test-pod.yaml). A [deployment example](extender.yaml) and [output example](docs/example.pdf) are provided.
 
 #### Extending the Extender: An example
 
