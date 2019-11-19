@@ -28,21 +28,8 @@ data:
   {
     "kind" : "Policy",
     "apiVersion" : "v1",
-    "predicates" : [
-      {"name" : "PodFitsHostPorts"},
-      {"name" : "PodFitsResources"},
-      {"name" : "NoDiskConflict"},
-      {"name" : "MatchNodeSelector"},
-      {"name" : "HostName"}
-    ],
-    "priorities" : [
-      {"name" : "LeastRequestedPriority", "weight" : 1},
-      {"name" : "BalancedResourceAllocation", "weight" : 1},
-      {"name" : "ServiceSpreadingPriority", "weight" : 1},
-      {"name" : "EqualPriority", "weight" : 1}
-    ],
     "extenders" : [{
-      "urlPrefix": "http://localhost/scheduler",
+      "urlPrefix": "http://localhost:5401/scheduler",
       "filterVerb": "predicates/safe-overload",
       "prioritizeVerb": "priorities/safe-overload",
       "preemptVerb": "",
@@ -52,12 +39,12 @@ data:
       "nodeCacheCapable": false
     },
     {
-      "urlPrefix": "http://localhost/scheduler",
+      "urlPrefix": "http://localhost:5402/scheduler",
       "filterVerb": "",
-      "prioritizeVerb": "priorities/safe-balance",
+      "prioritizeVerb": "priorities/congestion",
       "preemptVerb": "",
       "bindVerb": "",
-      "weight": 10,
+      "weight": 1,
       "enableHttps": false,
       "nodeCacheCapable": false
     }],
@@ -96,19 +83,19 @@ spec:
         volumeMounts:
         - name: my-scheduler-config
           mountPath: /my-scheduler
-      - name: my-kube-safe-scheduler-ctr
-        image: kube-safe-scheduler:1.13.5
+      - name: my-extender-ctr-1
+        image: kube-sched-ext-safe:0.0
         imagePullPolicy: IfNotPresent
         livenessProbe:
           httpGet:
             path: /version
-            port: 80
+            port: 5401
         readinessProbe:
           httpGet:
             path: /version
-            port: 80
+            port: 5401
         ports:
-          - containerPort: 80
+          - containerPort: 5401
         env:
           - name: SAFEUTILIZATION
             value: "90"
@@ -118,3 +105,23 @@ spec:
             value: "false"
           - name: SAFEFORECASTWEIGHT
             value: "20"
+          - name: HTTP_PORT
+            value: "5401"
+      - name: my-extender-ctr-2
+        image: kube-sched-ext-congestion:0.0
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /version
+            port: 5402
+        readinessProbe:
+          httpGet:
+            path: /version
+            port: 5402
+        ports:
+          - containerPort: 5402
+        env:
+          - name: CONGESTION_FACTOR_MAX
+            value: "10"
+          - name: HTTP_PORT
+            value: "5402"

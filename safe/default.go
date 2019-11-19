@@ -13,7 +13,7 @@ const (
 )
 
 /**
- * Key labels of resource usage quantities
+ * Key labels
  */
 const (
 	// MeanFreeMemoryKey : key for the mean free memory
