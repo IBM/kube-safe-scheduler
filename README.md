@@ -17,7 +17,7 @@ We will use this project as an incubator for new Kube scheduler extension ideas.
 
 ## Architecture for expanding on the scheduler extender
 
-We provide a solution for allowing the expansion of the scheduler extender to incorporate additional predicates and priority functions, as in the example above. We call a collection of predicates and priority functions which tackle a particular objective as an **Agent**. In particular, we include in this project the following agents:
+We provide a solution for allowing the expansion of the scheduler extender to incorporate additional predicates and priority functions, as in the example above. We refer to a collection of predicates and priority functions which tackle a particular objective as an **Agent**. In particular, we include in this project the following agents:
 
 - [Safe balancing and overloading agent](safe/README.md)
 - [Node-congestion aware agent](congestion/README.md)
@@ -54,7 +54,7 @@ Examples of two agents are provided: [safe](safe/) and [congestion](congestion/)
   - define the pod deployment
   - define the (default) scheduler container
   - Define one or more extender containers, each specifying the name of the agent image and the container port. An example of a pod with a scheduler conainer and two extender containers is [here](yamlfiles/extender.safe.congestion.yaml). Note that container 1 runs the *safe* agent extender on port 5401, whereas container 2 runs the *congestion* agent extender on port 5402. Environment variables for each agent are included, as well as the environment variable HTTP_PORT which defines the port number (default is 80).
-  - A note on deployment in clusters with RBAC security: The scheduler needs to run with some privileges in tube-system. A yaml which sets up a service account by the name *extender-serviceaccount* with the required privileges is provided [service-account](yamlfiles/service-account.yaml). If used, one needs to add `serviceAccountName: extender-serviceaccount` to the spec.template.spec of the Deployment in the extender yamlfile. The deployment of the service account yaml should precede the deployment of the extender yaml.
+  - A note on deployment in clusters with RBAC security: The scheduler needs to run with some privileges in kube-system. A yaml which sets up a service account by the name *extender-serviceaccount* with the required privileges is provided [service-account](yamlfiles/service-account.yaml). If used, one needs to add `serviceAccountName: extender-serviceaccount` to the spec.template.spec of the Deployment in the extender yaml file. The deployment of the service account yaml should precede the deployment of the extender yaml.
 
 ## Instructions
 
@@ -80,7 +80,7 @@ $ kubectl create -f yamlfiles/extender.xxx.yyy.yaml
 ### 3. schedule test pod
 
 ```
-$ kubectl create -f test-pod.yaml
+$ kubectl create -f yamlfiles/test-pod.yaml
 
 $ kubectl describe test-pod
 Name:         test-pod
