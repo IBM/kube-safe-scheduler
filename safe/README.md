@@ -6,7 +6,7 @@ The Safe agent scheduler extender together with a node annotator, which collects
 
 This is an extender to a default Kubernetes scheduler which provides predicates and priority functions with the intent of making safe loading of the nodes. The word "safe" refers to not overloading the nodes and distributing the load, accounting for variability in resource usage, rather than just amount of allocated resources. This extended Kubernetes scheduler uses historical resource usage data to schedule pods as opposed to relying on the specified pod requested demand. Overview and background information is [here](../docs/usageResourceAlloc.pdf). The current version considers two resources: CPU and memory. It is based on the [Kubernetes secheduler example](https://github.com/everpeace/k8s-scheduler-extender-example).
 
-A (separate) data collection [component](../node-annotator/README.md) gathers node resource usage data  (through Prometheus, for example) and annotates the node with such information. For example, data about resource usage is given as follows.
+A (separate) data collection [component](../node-annotator/usage/README.md) gathers node resource usage data  (through Prometheus, for example) and annotates the node with such information. For example, data about resource usage is given as follows.
 
 ```bash
 Annotations:

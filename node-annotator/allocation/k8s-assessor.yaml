@@ -1,0 +1,36 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s-assessor
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+     name: k8s-assessor
+  template:
+    metadata:
+      labels:
+        name: k8s-assessor
+        daemon: k8s-assessor
+      name: assessor-deployment
+    spec:
+      containers:
+        -
+          image: k8s-assessor:0.0
+          imagePullPolicy: IfNotPresent
+          name: k8s-assessor
+          env:
+            - name: ANNOTATE_FREQ
+              value: "60"
+          resources:
+            limits:
+              cpu: 100m
+              memory: 500Mi
+            requests:
+              cpu: 10m
+              memory: 100Mi
+          securityContext:
+            privileged: true
+            runAsUser: 0
+      hostNetwork: true
