@@ -97,7 +97,7 @@ Events:
 
 ### 4. inspect logs
 
-The *my-scheduler* pod contains two or more containers. One container, named *my-scheduler-ctr*, runs the default Kubernetes scheduler. Additional containers, named *my-extender-ctr-nnn*, where *nnn* is 1, 2, ... and so on, each runs an extender (http server) and one or more agents, implementing the related predicates and priority functions.
+The *my-scheduler* pod contains two or more containers. One container, named *my-scheduler-ctr*, runs the default Kubernetes scheduler. Additional containers, named *my-extender-ctr-nnn*, where *nnn* is 1, 2, ... and so on, each runs an extender (http server) and one or more agents, implementing the related predicates and priority functions.  
 
 The following command serves viewing the logs of the scheduler.
 
@@ -105,7 +105,7 @@ The following command serves viewing the logs of the scheduler.
 kubectl logs -f <my-scheduler-...>  -c my-scheduler-ctr -n kube-system
 ```
 
-And, the following command serves viewing the logs of a particular extender agent (substitute *nnn* by the container number of interest).
+And, the following command serves viewing the logs of a particular extender agent (substitute *nnn* by the container number of interest). The log level for the extender is controlled by the *LOG_LEVEL* environment variable. Possible values are: TRACE, DEBUG, INFO, WARNING, ERROR, and ALERT. The default value is INFO.
 
 ```
 kubectl logs -f <my-scheduler-...>  -c my-extender-ctr-nnn -n kube-system

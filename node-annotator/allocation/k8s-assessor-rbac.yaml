@@ -1,0 +1,104 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s-assessor
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+     name: k8s-assessor
+  template:
+    metadata:
+      labels:
+        name: k8s-assessor
+        daemon: k8s-assessor
+      name: assessor-deployment
+    spec:
+      serviceAccountName: assessor-serviceaccount
+      containers:
+        -
+          image: k8s-assessor:0.0
+          imagePullPolicy: IfNotPresent
+          name: k8s-assessor
+          env:
+            - name: ANNOTATE_FREQ
+              value: "60"
+          resources:
+            limits:
+              cpu: 100m
+              memory: 500Mi
+            requests:
+              cpu: 10m
+              memory: 100Mi
+          securityContext:
+            privileged: true
+            runAsUser: 0
+      hostNetwork: true
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: assessor-serviceaccount
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: assessor-rolebinding
+  namespace: kube-system
+subjects:
+- kind: ServiceAccount
+  name: assessor-serviceaccount
+  namespace: kube-system
+roleRef:
+  kind: ClusterRole
+  name: assessor-clusterrole
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: assessor-clusterrole
+  namespace: kube-system
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  verbs:
+  - get
+  - list
+  - watch
+  - patch
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
+  - patch
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - pods/status
+  verbs:
+  - get
+  - list
+  - watch
+  - patch
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - get
+  - list
+  - watch
+---
+ 
