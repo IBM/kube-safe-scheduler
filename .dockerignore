@@ -1,0 +1,6 @@
+*.yaml
+*/temp*
+*/docs*
+*/node-annotator*
+*/media*
+*/dockerfiles*

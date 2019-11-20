@@ -22,10 +22,20 @@ const (
 	preemptionPath   = apiPrefix + "/preemption"
 	predicatesPrefix = apiPrefix + "/predicates"
 	prioritiesPrefix = apiPrefix + "/priorities"
+
+	defaultHTTPPort = "80"
+	keyHTTPPort     = "HTTP_PORT"
 )
 
 var (
-	version string // injected via ldflags at build time
+	// injected via ldflags at build time
+	version string
+
+	// switch to initialize operation only once
+	initialized = false
+
+	// the http router
+	router *httprouter.Router
 
 	// NoBind :
 	NoBind = Bind{
@@ -45,6 +55,38 @@ var (
 		},
 	}
 )
+
+func init() {
+	InitMain()
+}
+
+// InitMain : initialize main - should be done before any other init()
+func InitMain() {
+	if !initialized {
+		// init logger
+		initLogger()
+
+		// init router
+		router = httprouter.New()
+		AddVersion(router)
+
+		initialized = true
+	}
+}
+
+// Initialize logger
+func initLogger() {
+	colog.SetDefaultLevel(colog.LInfo)
+	colog.SetMinLevel(colog.LInfo)
+	colog.SetFormatter(&colog.StdFormatter{
+		Colors: true,
+		Flag:   log.Ldate | log.Ltime | log.Lshortfile,
+	})
+	colog.Register()
+	level := StringToLevel(os.Getenv("LOG_LEVEL"))
+	log.Print("Log level was set to ", strings.ToUpper(level.String()))
+	colog.SetMinLevel(level)
+}
 
 // StringToLevel : determine log level
 func StringToLevel(levelStr string) colog.Level {
@@ -67,37 +109,27 @@ func StringToLevel(levelStr string) colog.Level {
 	}
 }
 
+// AddRouterPredicate : add a predicate to the router
+func AddRouterPredicate(p Predicate) {
+	AddPredicate(router, p)
+}
+
+// AddRouterPriority : add a priority function to the router
+func AddRouterPriority(p Prioritize) {
+	AddPrioritize(router, p)
+}
+
 func main() {
-	colog.SetDefaultLevel(colog.LInfo)
-	colog.SetMinLevel(colog.LInfo)
-	colog.SetFormatter(&colog.StdFormatter{
-		Colors: true,
-		Flag:   log.Ldate | log.Ltime | log.Lshortfile,
-	})
-	colog.Register()
-	level := StringToLevel(os.Getenv("LOG_LEVEL"))
-	log.Print("Log level was set to ", strings.ToUpper(level.String()))
-	colog.SetMinLevel(level)
-
-	router := httprouter.New()
-	AddVersion(router)
-
-	// define set of predicates
-	predicates := []Predicate{SafeOverloadPredicate}
-	for _, p := range predicates {
-		AddPredicate(router, p)
-	}
-
-	// define set of priority functions
-	priorities := []Prioritize{SafeBalancePriority, SafeOverloadPriority, CongestionPriority}
-	for _, p := range priorities {
-		AddPrioritize(router, p)
-	}
-
 	AddBind(router, NoBind)
 
-	log.Print("info: server starting on the port :80")
-	if err := http.ListenAndServe(":80", router); err != nil {
+	// start http server
+	hostPort := defaultHTTPPort
+	if hp := os.Getenv(keyHTTPPort); len(hp) > 0 {
+		hostPort = hp
+	}
+
+	log.Printf("info: server starting on port %s \n", hostPort)
+	if err := http.ListenAndServe(":"+hostPort, router); err != nil {
 		log.Fatal(err)
 	}
 }
