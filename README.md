@@ -20,6 +20,7 @@ We will use this project as an incubator for new Kube scheduler extension ideas.
 We provide a solution for allowing the expansion of the scheduler extender to incorporate additional predicates and priority functions, as in the example above. We refer to a collection of predicates and priority functions which tackle a particular objective as an **Agent**. In particular, we include in this project the following agents:
 
 - [Safe balancing and overloading agent](safe/README.md)
+- [Policy-based optimizing agent](pigeon/README.md)
 - [Node-congestion aware agent](congestion/README.md)
 - [Template agent](foo/README.md)
 
@@ -58,7 +59,7 @@ Examples of two agents are provided: [safe](safe/) and [congestion](congestion/)
 
 ## Instructions
 
-Now, we provide instructions to build an agent image, deploy the scheduler extender, and test by placing a pod using the scheduler extender. In the following *xxx* refers to a particular agent of interest. For example, substitutions such as *safe*, *congestion*, and *foo* are possible.
+Now, we provide instructions to build an agent image, deploy the scheduler extender, and test by placing a pod using the scheduler extender. In the following *xxx* refers to a particular agent of interest. For example, substitutions such as *safe*, *pigeon*, *congestion*, and *foo* are possible.
 
 ### 1. buid a docker image
 
