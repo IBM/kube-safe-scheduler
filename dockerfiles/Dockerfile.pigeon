@@ -1,0 +1,61 @@
+# Build image
+FROM golang:1.10-alpine as builder
+ENV CGO_ENABLED=1
+ENV GOOS=linux
+ENV GOARCH=amd64
+
+ARG VERSION=0.0.1
+
+# (note: alpine-sdk is needed to avoid segmentation fault issue with cgo libraries)
+# (additional: rsync linux-headers mercurial)
+RUN apk add --update git alpine-sdk build-base bash	\
+    && apk update && apk upgrade
+
+ENV GOPATH=/go
+ENV GOBASE=$GOPATH/src/kube-safe-scheduler
+ENV GOPIGEON=$GOBASE/pigeon
+
+ENV CPATH=/c
+ENV CBASE=$CPATH/pigeon
+ENV CSRC=$CBASE/src
+ENV CBIN=$CBASE/Debug
+ENV OUT=/out
+
+RUN mkdir -p $GOBASE	\
+    && mkdir -p $CBASE	\
+    $$ mkdir -p $OUT
+
+COPY . $GOBASE
+
+# build C code
+RUN cp -r $GOBASE/pigeon_c/* $CBASE	\
+    && make -C $CBIN all
+
+RUN ln -sf $CBIN/libpigeon.so  $GOPIGEON/pigeonmodule/libs/libpigeon.so   \
+    && ln -sf $CSRC/* $GOPIGEON/pigeonmodule/include
+
+# build Go code (https://golang.org/cmd/link/)
+RUN go install -tags pigeon -ldflags "-s -w -X main.version=$VERSION" kube-safe-scheduler
+
+RUN cp $GOPATH/bin/kube-safe-scheduler $OUT/kube-safe-scheduler	\
+    && cp $GOBASE/pigeon_c/pigeon.cfg $OUT/pigeon.cfg			\
+    && cp $CBIN/libpigeon.so $OUT/libpigeon.so
+
+
+# Runtime image
+#FROM gcr.io/google_containers/ubuntu-slim:0.14
+
+FROM alpine
+RUN apk add --update bash	\
+    && apk update && apk upgrade
+
+ENV OUT=/out
+ENV TARGET /usr/local/bin
+ENV LD_LIBRARY_PATH $TARGET
+WORKDIR $TARGET
+
+COPY --from=builder $OUT/kube-safe-scheduler kube-safe-scheduler
+COPY --from=builder $OUT/pigeon.cfg pigeon.cfg
+COPY --from=builder $OUT/libpigeon.so libpigeon.so
+
+ENTRYPOINT ["kube-safe-scheduler"]
