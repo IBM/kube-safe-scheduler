@@ -33,7 +33,7 @@ We chose to implement the external method. A node allocation annotator, called [
 
 ## Configuration
 
-A configuration [file](pigeon_c/pigeon.cfg) is provided to specify the following configuration variables.
+A configuration [file](../pigeon_c/pigeon.cfg) is provided to specify the following configuration variables.
 
 - **policyObjective**: Current choices are *A_BINPACK* (default), *LOAD_BALANCE*, and *CONSOLIDATE*.
 - **policyResourceIndex**: This is the index of the prime resource. The supported resources are (in order): CPU, memory, number of pods, GPU, and storage. Hence, the index of resources is 0, 1, ..., respectively. Not all resources have to be considered when placing pods. By default, the first two resources are considered. But, one may override this choice by setting an environment variable as described below. Currently, the choice of the number of resources, say n, dictates that resources with indices 0, 1, ..., n-1 are all considered. Extension to selective resources is straightforward.
