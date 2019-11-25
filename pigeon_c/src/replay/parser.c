@@ -88,7 +88,9 @@ char* parser_nextkeyvaluepair(char* q, char* k, char* v, bool* issingleton) {
 
 int parser_decode_int(char * s) {
 	int value = 0;
-	sscanf(s, "%d", &value);
+	if (s) {
+		sscanf(s, "%d", &value);
+	}
 	return value;
 }
 
@@ -133,7 +135,9 @@ int** parser_decode_intarray(char * s, int nrows, int ncols) {
 
 float parser_decode_float(char * s) {
 	float value = 0;
-	sscanf(s, "%f", &value);
+	if (s) {
+		sscanf(s, "%f", &value);
+	}
 	return value;
 }
 
