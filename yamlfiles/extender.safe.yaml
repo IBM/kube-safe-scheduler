@@ -47,8 +47,7 @@ data:
       "weight": 10,
       "enableHttps": false,
       "nodeCacheCapable": false
-    }],
-    "hardPodAffinitySymmetricWeight" : 10
+    }]
   }
 ---
 apiVersion: apps/v1

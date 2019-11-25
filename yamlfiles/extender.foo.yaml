@@ -34,11 +34,10 @@ data:
       "prioritizeVerb": "priorities/foo",
       "preemptVerb": "",
       "bindVerb": "",
-      "weight": 1,
+      "weight": 10,
       "enableHttps": false,
       "nodeCacheCapable": false
-    }],
-    "hardPodAffinitySymmetricWeight" : 10
+    }]
   }
 ---
 apiVersion: apps/v1
