@@ -6,12 +6,12 @@ We will use this project as an incubator for new Kube scheduler extension ideas.
 
 ## Architecture for expanding on the scheduler extender
 
-We provide a solution for allowing the expansion of the scheduler extender to incorporate additional predicates and priority functions, as in the example above. We refer to a collection of predicates and priority functions which tackle a particular objective as an **Agent**. In particular, we include in this project the following agents:
+We provide a solution for allowing the expansion of the scheduler extender to incorporate additional predicates and priority functions. We refer to a collection of predicates and priority functions which tackle a particular objective as an **Agent**. In particular, we include in this project the following agents:
 
-- [Safe balancing and overloading agent](safe/)
-- [Policy-based optimizing agent](pigeon/)
-- [Node-congestion aware agent](congestion/)
-- [Template agent](foo/)
+- [Safe balancing and overloading agent (safe)](safe/)
+- [Policy-based optimizing agent (pigeon)](pigeon/)
+- [Node-congestion aware agent (congestion)](congestion/)
+- [Template agent (foo)](foo/)
 
 We seek an architecture which (1) allows ease of expandability and introducion of new agents, (2) provides a development environment for an agent, in isolation of other agents, and (3) enables the selective deployment of agents as scheduler extenders. A detailed description is provided [here](docs/ExpandingKubeSchedulerExtender.pdf).
 
@@ -23,7 +23,7 @@ The above is packaged into one pod with multiple containers. One container runs 
 
 ![architecture](docs/arch-pod.png)
 
-Examples of two agents are provided: [safe](safe/) and [congestion](congestion/). In addition, a template agent [foo](foo/) is also provided. To add an agent, say foo, one needs to:
+In this project, several examples of agents are provided, as well as a template agent. To add an agent, say foo, one needs to:
 
 - Create a file [foo.go](foo.go) in package main. Its sole purpose is to register the agent predicates and prioritiy functions with the router created by [main.go](main.go) as depicted below.
 
