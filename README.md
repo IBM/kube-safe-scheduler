@@ -2,7 +2,7 @@
 
 This project capitalizes on the Kubernetes scheduler extender model to enhance the functionality of the scheduler. The Kubernetes `default scheduler` offers a lot of value in terms of the vast number of predicates and priorities it implements. Moreover, it is highly configurable, in the sense that we can change the default configuration to one that better matches our needs. However, there is still room for improvement, and this improvement can be implemented in the form of extensions. 
 
-We will use this project as an incubator for new Kube scheduler extension ideas.
+We will use this project as an incubator for new Kube scheduler extension ideas. The base scheduler extender is built on the [Kubernetes scheduler example](https://github.com/everpeace/k8s-scheduler-extender-example).
 
 ## Architecture for expanding on the scheduler extender
 
