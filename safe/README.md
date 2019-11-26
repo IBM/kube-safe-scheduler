@@ -1,12 +1,27 @@
 # Safe Agent: Scheduling influenced by resource usage dynamics
 
-The Safe agent scheduler extender together with a node annotator, which collects statistics from Prometheus (or Metric server), provides a Kubernetes scheduling solution that is influenced by actual resource usage, rather than just resource allocation. This `Safe Scheduler` performs risk-aware (safe) allocation of resources, based on actual and predicted resource usage statistics of each node in the cluster, hence leading to safer placement of workload avoiding noisy neighbors, and reducing probability of evictions. It can also be configured to perform risk-aware over-commitment leading to better cluster utilization. The risk calculation minimizes the probability of exceeding the available resources, thus the name "Safe Scheduler".
+## Motivation
+
+When placing a pod, the default scheduler is concerned with the amount of available and requested resources and does not consider the actual usage of resources of a given node. As shown in the figure below, the actual utilization may be valuable information to the scheduler when deciding on a node to place a pod.
+
+![overview](../media/overview.png)
+
+For example, if two nodes have a capacity of 8 CPUs, and only 5 are requested on each, then the two nodes will be deemed equivalent (assuming everything else is identical) for the default scheduler. However, we can extend to the priority algorithms to favor the node with less CPU actual utilization over a given period of time (e.g. last 6 hours).
+
+Consider the example shown below, from the Kubernetes `default scheduler` perspective, both `Node_1` and `Node_2` are equally favorable for placing a new pod (e.g. requesting only CPU). However, by looking at historical data and the actual CPU utilization on the node, we can clearly see that we can be better performance for the new pod by placing it on `Node_1`. Moreover, this will further balance the CPU utilization accross the cluster nodes. 
+
+![overview](../media/use-case.png)
+
+
+Here, we provide, a `Safe Scheduler` which targets this issue, as well as having the ability to take risks on nodes with high requests but low actual utilization to maximize efficiency.
 
 ## Description
 
-This is an extender to a default Kubernetes scheduler which provides predicates and priority functions with the intent of making safe loading of the nodes. The word "safe" refers to not overloading the nodes and distributing the load, accounting for variability in resource usage, rather than just amount of allocated resources. This extended Kubernetes scheduler uses historical resource usage data to schedule pods as opposed to relying on the specified pod requested demand. Overview and background information is [here](../docs/usageResourceAlloc.pdf). The current version considers two resources: CPU and memory. It is based on the [Kubernetes secheduler example](https://github.com/everpeace/k8s-scheduler-extender-example).
+The Safe agent scheduler extender together with a node annotator, which collects statistics from Prometheus (or Metric server), provides a Kubernetes scheduling solution that is influenced by actual resource usage, rather than just resource allocation. This `Safe Scheduler` performs risk-aware (safe) allocation of resources, based on actual and predicted resource usage statistics of each node in the cluster, hence leading to safer placement of workload avoiding noisy neighbors, and reducing probability of evictions. It can also be configured to perform risk-aware over-commitment leading to better cluster utilization. The risk calculation minimizes the probability of exceeding the available resources, thus the name "Safe Scheduler".
 
-A (separate) data collection [component](../node-annotator/usage/README.md) gathers node resource usage data  (through Prometheus, for example) and annotates the node with such information. For example, data about resource usage is given as follows.
+This is an extender to a default Kubernetes scheduler which provides predicates and priority functions with the intent of making safe loading of the nodes. The word "safe" refers to not overloading the nodes and distributing the load, accounting for variability in resource usage, rather than just amount of allocated resources. This extended Kubernetes scheduler uses historical resource usage data to schedule pods as opposed to relying on the specified pod requested demand. Overview and background information is [here](../docs/usageResourceAlloc.pdf). The current version considers two resources: CPU and memory. 
+
+A (separate) data collection [component](../node-annotator/usage/) gathers node resource usage data  (through Prometheus, for example) and annotates the node with such information. For example, data about resource usage is given as follows.
 
 ```bash
 Annotations:
@@ -51,3 +66,4 @@ env:
 ```
 
 Samples of deployment yaml files for the `Safe Scheduler` and pods are provided. The scheduler deployment file deploys a pod with two containers: a default scheduler (named my-scheduler) and the `Safe Scheduler` extender. The desired predicates and priority functions to be applied in a given deployment are specified in the ConfigMap specifications. A pod uses the `Safe Scheduler` by asking for the scheduler by name (my-scheduler) as in the [pod creation example](../yamlfiles/test-pod.yaml). A [deployment example](../yamlfiles/extender.safe.yaml) and [output example](../docs/example.pdf) are provided.
+
