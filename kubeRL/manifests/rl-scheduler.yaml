@@ -1,0 +1,250 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  namespace: kube-system
+  name: scheduler-resource-reader
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
+      - update
+  - apiGroups:
+      - "*"
+    resources:
+      - configmaps
+      - storageclasses
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - endpoints
+    verbs:
+      - create
+      - get
+      - list
+      - watch
+      - delete
+      - update
+
+  - apiGroups:
+      - ""
+    resourceNames:
+      - kube-scheduler
+    resources:
+      - endpoints
+    verbs:
+      - delete
+      - get
+      - patch
+      - update
+  - apiGroups:
+      - ""
+    resources:
+      - nodes
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - delete
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - bindings
+      - pods/binding
+    verbs:
+      - create
+  - apiGroups:
+      - ""
+    resources:
+      - pods/status
+    verbs:
+      - patch
+      - update
+  - apiGroups:
+      - ""
+    resources:
+      - replicationcontrollers
+      - services
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - apps
+      - extensions
+    resources:
+      - replicasets
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - apps
+    resources:
+      - statefulsets
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - policy
+    resources:
+      - poddisruptionbudgets
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - persistentvolumeclaims
+      - persistentvolumes
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - authentication.k8s.io
+    resources:
+      - tokenreviews
+    verbs:
+      - create
+  - apiGroups:
+      - authorization.k8s.io
+    resources:
+      - subjectaccessreviews
+    verbs:
+      - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: scheduler-resource-reader-binding
+  namespace: kube-system
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: kube-system
+roleRef:
+  kind: ClusterRole
+  name: scheduler-resource-reader
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rl-scheduler-config
+  namespace: kube-system
+data:
+  config.yaml: |
+    apiVersion: kubescheduler.config.k8s.io/v1alpha1
+    kind: KubeSchedulerConfiguration
+    schedulerName: rl-scheduler
+    algorithmSource:
+      policy:
+        configMap:
+          namespace: kube-system
+          name: rl-scheduler-policy
+    leaderElection:
+      leaderElect: true
+      lockObjectName: rl-scheduler
+      lockObjectNamespace: kube-system
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rl-scheduler-policy
+  namespace: kube-system
+data:
+  policy.cfg : |
+    {
+      "kind" : "Policy",
+      "apiVersion" : "v1",
+      "predicates" : [
+        {"name" : "PodFitsHostPorts"},
+        {"name" : "PodFitsResources"},
+        {"name" : "NoDiskConflict"},
+        {"name" : "MatchNodeSelector"},
+        {"name" : "HostName"}
+      ],
+      "priorities" : [
+        {"name" : "LeastRequestedPriority", "weight" : 1},
+        {"name" : "BalancedResourceAllocation", "weight" : 1},
+        {"name" : "ServiceSpreadingPriority", "weight" : 1},
+        {"name" : "EqualPriority", "weight" : 1}
+      ],
+      "extenders" : [
+      {
+        "urlPrefix": "http://localhost/scheduler",
+        "prioritizeVerb": "priorities/rl-priority",
+        "weight": 10,
+        "enableHttps": false,
+        "nodeCacheCapable": false
+      }
+      ],
+      "hardPodAffinitySymmetricWeight" : 10
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rl-scheduler
+  namespace: kube-system
+  labels:
+    app: rl-scheduler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rl-scheduler
+  template:
+    metadata:
+      labels:
+        app: rl-scheduler
+    spec:
+      volumes:
+        - name: rl-scheduler-config
+          configMap:
+            name: rl-scheduler-config
+      containers:
+        - name: rl-scheduler
+          image: gcr.io/google_containers/hyperkube:v1.13.5
+          imagePullPolicy: IfNotPresent
+          args:
+          - kube-scheduler
+          - --config=/rl-scheduler/config.yaml
+          - -v=4
+          volumeMounts:
+          - name: rl-scheduler-config
+            mountPath: /rl-scheduler
+        - name: rl-scheduler-extender
+          image: chenw/rl-scheduler-extender:latest
+          imagePullPolicy: Always
+          livenessProbe:
+            httpGet:
+              path: /version
+              port: 80
+          readinessProbe:
+            httpGet:
+              path: /version
+              port: 80
+          ports:
+            - containerPort: 80
+          env:
+            - name: LOG_LEVEL
+              value: INFO

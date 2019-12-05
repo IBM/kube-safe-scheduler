@@ -1,0 +1,19 @@
+#!/bin/bash
+
+hostIP=$(hostname -I | cut -d' ' -f1)
+echo "Current host IP is $hostIP!"
+
+if [ "$hostIP" == "NODE1" ]; then
+    echo "demo container on $hostIP exited with 1 every 10 seconds!"
+    sleep 5
+    exit 1
+else
+    if [ "$hostIP" == "NODE2" ]; then
+        echo "demo container on $hostIP exited with 2 every 1 minute!"
+        sleep 60
+        exit 2
+    else
+        echo "demo container on $hostIP, sleep forever and do not exit!"
+        sleep infinity
+    fi
+fi

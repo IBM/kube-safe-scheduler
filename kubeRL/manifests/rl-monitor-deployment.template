@@ -1,0 +1,45 @@
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: rl-admin
+rules:
+  # Just an example, feel free to change it
+  - apiGroups: [""]
+    resources: ["pods", "nodes"]
+    verbs: ["get", "watch", "list"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: rl-rbac
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: default
+roleRef:
+  kind: ClusterRole
+  name: rl-admin
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rl-monitor-deployment
+  labels:
+    app: rl-monitor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rl-monitor
+  template:
+    metadata:
+      labels:
+        app: rl-monitor
+        podtype: kubeRL
+    spec:
+      containers:
+        - name: rl-monitor
+          image: _USERID_rl-monitor:latest
+          imagePullPolicy: Always
