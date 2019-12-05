@@ -96,7 +96,7 @@ You should now see all pods with `rl-` prefixes created.
 $ watch 'kubectl get pods --all-namespaces |grep rl-'
 ```
 
-### Step 3: Watch logs and caching rewards on `rl-etcd`
+#### Step 3: Watch logs and caching rewards on `rl-etcd`
 You can stream logs to your console to study how `kubeRL` works. 
 1. Open a terminal to watch `rl-monitor` pod logs.
     ```shell script
