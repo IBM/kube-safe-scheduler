@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rl-demo-deployment
+  labels:
+    app: rl-demo
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: rl-demo
+  template:
+    metadata:
+      labels:
+        app: rl-demo
+        podtype: D
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - rl-demo
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: curl
+        image: chenw/rl-demo:latest
+        imagePullPolicy: Always
+        resources:
+            limits:
+              cpu: 10m
+              memory: 10Mi
+            requests:
+              cpu: 10m
+              memory: 10Mi
+      hostNetwork: true
+      dnsPolicy: Default

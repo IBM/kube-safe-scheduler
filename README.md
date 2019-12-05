@@ -12,6 +12,9 @@ We provide a solution for allowing the expansion of the scheduler extender to in
 - [Policy-based optimizing agent (pigeon)](pigeon/)
 - [Node-congestion aware agent (congestion)](congestion/)
 - [Template agent (foo)](foo/)
+- [Reward biased scheduler extender (kubeRL)](kubeRL/)
+  - `kubeRL` is a software framework implementing a reward biased scheduler extender in Kubernetes. `kubeRL` adopts the idea from reinforcement learning to adaptively learn the failures or performance issues of containers and model their runtime performance on nodes as rewards. kubeRL then adaptively prevents scheduling pods on nodes that give low rewards.
+  - `kubeRL` provides one-click deployment [`make deploy-only`](kubeRL/) and a [demo tutorial](kubeRL/). To use `kubeRL`,please skip the following steps.
 
 We seek an architecture which (1) allows ease of expandability and introducion of new agents, (2) provides a development environment for an agent, in isolation of other agents, and (3) enables the selective deployment of agents as scheduler extenders. A detailed description is provided [here](docs/ExpandingKubeSchedulerExtender.pdf).
 
