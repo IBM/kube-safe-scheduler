@@ -103,3 +103,12 @@ And, the following command serves viewing the logs of a particular extender agen
 ```
 kubectl logs -f <my-scheduler-...>  -c my-extender-ctr-nnn -n kube-system
 ```
+
+## Note
+
+The following files have been removed from the vendor folder as they contain authentication credentials. You may download them from k8s.io/kubernetes to your forked repository.
+
+
+    vendor/k8s.io/kubernetes/test/e2e/common/runtime.go
+    vendor/k8s.io/kubernetes/test/e2e_node/runtime_conformance_test.go
+
